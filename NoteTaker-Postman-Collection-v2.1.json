@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "NoteTaker API",
+    "_postman_id": "c9f4d3a2-8b7e-4c11-9f99-notetaker-api",
+    "description": "Postman Collection for the NoteTaker API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8787/api/v1"
+    },
+    {
+      "key": "noteId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Note",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Sprint Planning\",\n  \"content\": \"Review backlog and discuss priorities\",\n  \"category\": \"Work\"\n}"
+        },
+        "url": "{{baseUrl}}/notes"
+      }
+    },
+    {
+      "name": "Get All Notes",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notes"
+      }
+    },
+    {
+      "name": "Get Note By ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "Get Notes By Category",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notes/categories/{{categoryId}}"
+      }
+    },
+    {
+      "name": "Update Note",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Sprint Planning\",\n  \"content\": \"Updated discussion notes\",\n  \"category\": \"Personal\"\n}"
+        },
+        "url": "{{baseUrl}}/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "Delete Note",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/notes/{{noteId}}"
+      }
+    }
+  ]
+}

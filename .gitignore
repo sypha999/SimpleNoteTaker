@@ -1,0 +1,8 @@
+dist
+node_modules
+.idea
+NoteTaker.iml
+/node_modules/
+/dist/
+/.idea/
+/node_modules/
