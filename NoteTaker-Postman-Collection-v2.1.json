@@ -205,7 +205,7 @@
         {
           "name": "Update Note",
           "request": {
-            "method": "PUT",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
