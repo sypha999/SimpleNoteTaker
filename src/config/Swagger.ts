@@ -11,7 +11,12 @@ const options: swaggerJsdoc.Options = {
             title: 'Note Taking API',
             version: '1.0.0',
             description: 'Simple Note Taking API'
-        },
+        },  
+        security: [
+            {
+                BearerAuth: []
+            }
+        ],
         servers: [
             {
                 url: 'http://localhost:'+PORT,

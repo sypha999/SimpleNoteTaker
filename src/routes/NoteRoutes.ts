@@ -4,10 +4,15 @@ import {UpdateNoteDto} from "../models/dto/UpdateNoteDto";
 
 import {CreateNoteDto} from "../models/dto/CreateNoteDto";
 import {validateDto} from "../middlewares/ValidatorMiddleware";
+import { RegisterDto } from '../models/dto/RegisterDto';
+import { LoginDto } from '../models/dto/LoginDto';
+import { AuthController } from '../controllers/AuthController';
+import { authenticate } from '../middlewares/AuthMiddleware';
 
 const router = express.Router();
 
 const noteController = new NoteController();
+const authController = new AuthController();
 
 /**
  * @swagger
@@ -350,36 +355,217 @@ const noteController = new NoteController();
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 6858c0f8b4b1d6f48d123456
+ *         firstName:
+ *           type: string
+ *           example: John
+ *         lastName:
+ *           type: string
+ *           example: Doe
+ *         email:
+ *           type: string
+ *           example: john@example.com
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *
+ *     RegisterRequest:
+ *       type: object
+ *       required:
+ *         - firstName
+ *         - lastName
+ *         - email
+ *         - password
+ *       properties:
+ *         firstName:
+ *           type: string
+ *           example: John
+ *         lastName:
+ *           type: string
+ *           example: Doe
+ *         email:
+ *           type: string
+ *           example: john@example.com
+ *         password:
+ *           type: string
+ *           example: Password123
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *
+ *     LoginRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: john@example.com
+ *         password:
+ *           type: string
+ *           example: Password123
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *
+ *     AuthResponse:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *
+ *     Note:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         content:
+ *           type: string
+ *         category:
+ *           $ref: '#/components/schemas/Category'
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       409:
+ *         description: User already exists
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: Login and obtain JWT token
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       401:
+ *         description: Invalid credentials
+ */
+
+router.post(
+    '/auth/register',
+    validateDto(RegisterDto),
+    authController.register
+);
+
+router.post(
+    '/auth/login',
+    validateDto(LoginDto),
+    authController.login
+);
+
+router.use(authenticate);
+
 router.get(
-    '/',
+    '/notes/',
     noteController.getNotes.bind(noteController)
 );
 
 router.get(
-    '/:id',
+    '/notes/:id',
     noteController.getNote.bind(noteController)
 );
 
 router.post(
-    '/',
+    '/notes/',
     validateDto(CreateNoteDto),
     noteController.createNote.bind(noteController)
 );
 
 router.get(
-    '/categories/:categoryId',
+    '/notes/categories/:categoryId',
     noteController.getNotesByCategory
 );
 
 router.patch(
-    '/:id',
+    '/notes/:id',
     validateDto(UpdateNoteDto),
     noteController.updateNote
 );
 
 router.delete(
-    '/:id',
+    '/notes/:id',
     noteController.deleteNote.bind(noteController)
 );
+
+
 
 export default router;

@@ -16,12 +16,12 @@ export class NoteService {
         this.categoryService = new CategoryService();
     }
 
-    async getAllNotes() {
-        return Note.find()
+    async getAllNotes(userId: string) {
+        return Note.find({user:userId})
             .populate('category');
     }
 
-    async getNoteById(id: string) {
+    async getNoteById( id: string, userId:string ) {
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new AppError(
@@ -31,7 +31,9 @@ export class NoteService {
         }
 
         const note = await Note
-            .findById(id)
+            .findOne({_id:id,
+                        user: userId
+            })
             .populate('category');
 
         if (!note) {
@@ -44,13 +46,12 @@ export class NoteService {
         return note;
     }
 
-    async createNote(
-        noteData: CreateNoteDto
-    ) {
+    async createNote( noteData: CreateNoteDto, userId:string ) {
 
         const existingNote =
             await Note.findOne({
-                title: noteData.title
+                title: noteData.title,
+                user: userId
             });
 
         if (existingNote) {
@@ -69,16 +70,15 @@ export class NoteService {
         const note = await Note.create({
             title: noteData.title,
             content: noteData.content,
-            category: category._id
+            category: category._id,
+            user: userId
         });
 
         return Note.findById(note._id)
             .populate('category');
     }
 
-    async getNotesByCategory(
-        categoryId: string
-    ) {
+    async getNotesByCategory( categoryId: string, userId:string ) {
 
         if (
             !mongoose.Types.ObjectId.isValid(
@@ -92,14 +92,12 @@ export class NoteService {
         }
 
         return Note.find({
-            category: categoryId
+            category: categoryId,
+            user: userId
         }).populate('category');
     }
 
-    async updateNote(
-        id: string,
-        dto: UpdateNoteDto
-    ) {
+    async updateNote( id: string, dto: UpdateNoteDto, userId:string ) {
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new AppError(
@@ -139,8 +137,11 @@ export class NoteService {
         }
 
         const note =
-            await Note.findByIdAndUpdate(
-                id,
+            await Note.findOneAndUpdate(
+                {
+                _id: id,
+                user: userId
+                },
                 {
                     $set: updateData
                 },
@@ -160,9 +161,7 @@ export class NoteService {
         return note;
     }
 
-    async deleteNote(
-        id: string
-    ) {
+    async deleteNote( id: string, userId:string ) {
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new AppError(
@@ -172,7 +171,10 @@ export class NoteService {
         }
 
         const note =
-            await Note.findByIdAndDelete(id);
+            await Note.findByIdAndDelete({
+                _id: id,
+                user: userId
+            });
 
         if (!note) {
             throw new AppError(

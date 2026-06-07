@@ -9,7 +9,8 @@ const app = express();
 
 app.use(express.json());
 app.use(logger);
-app.use('/api/v1/notes', noteRoutes);
+
+app.use('/api/v1', noteRoutes);
 app.use(
     '/swagger',
     swaggerUi.serve,

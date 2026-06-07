@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { NoteService } from '../services/NoteService';
-
+import { getAuthenticatedUserId } from '../utils/AuthUtil';
 const noteService = new NoteService();
 
 export class NoteController {
@@ -10,11 +10,25 @@ export class NoteController {
         res: Response,
         next: NextFunction
     ) {
-        try {
-            const notes = await noteService.getAllNotes();
 
-            res.status(200).json(notes);
+        try {
+
+            const userId =
+                getAuthenticatedUserId(
+                    req
+                );
+
+            const notes =
+                await noteService
+                    .getAllNotes(
+                        userId
+                    );
+
+            res.status(200)
+                .json(notes);
+
         } catch (error) {
+
             next(error);
         }
     }
@@ -24,13 +38,26 @@ export class NoteController {
         res: Response,
         next: NextFunction
     ) {
-        try {
-            const note =
-                await noteService.getNoteById(req.params.id.toString());
 
-            res.status(200).json(note);
+        try {
+
+            const userId =
+                getAuthenticatedUserId(
+                    req
+                );
+
+            const note =
+                await noteService
+                    .getNoteById(
+                        req.params.id.toString(),
+                        userId
+                    );
+
+            res.status(200)
+                .json(note);
+
         } catch (error) {
-            console.error(error);
+
             next(error);
         }
     }
@@ -40,74 +67,130 @@ export class NoteController {
         res: Response,
         next: NextFunction
     ) {
+
         try {
 
-            const note =
-                await noteService.createNote(req.body);
+            const userId =
+                getAuthenticatedUserId(
+                    req
+                );
 
-            res.status(201).json(note);
+            const note =
+                await noteService
+                    .createNote(
+                        req.body,
+                        userId
+                    );
+
+            res.status(201)
+                .json(note);
 
         } catch (error) {
+
             next(error);
         }
     }
 
-    public getNotesByCategory = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ): Promise<void> => {
+    public getNotesByCategory =
+        async (
+            req: Request,
+            res: Response,
+            next: NextFunction
+        ): Promise<void> => {
 
-        try {
+            try {
 
-            const notes =
-                await noteService
-                    .getNotesByCategory(
-                        req.params.categoryId.toString(),
+                const userId =
+                    getAuthenticatedUserId(
+                        req
                     );
 
-            res.status(200).json(notes);
+                const notes =
+                    await noteService
+                        .getNotesByCategory(
+                            req.params
+                                .categoryId
+                                .toString(),
+                            userId
+                        );
 
-        } catch (error) {
-            next(error);
-        }
-    };
+                res.status(200)
+                    .json(notes);
 
+            } catch (error) {
 
-    public updateNote = async (
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ): Promise<void> => {
+                next(error);
+            }
+        };
 
-        try {
+    public updateNote =
+        async (
+            req: Request,
+            res: Response,
+            next: NextFunction
+        ): Promise<void> => {
 
-            const note =
-                await noteService.updateNote(
-                    req.params.id.toString(),
-                    req.body
-                );
+            try {
 
-            res.status(200).json(note);
+                const userId =
+                    getAuthenticatedUserId(
+                        req
+                    );
 
-        } catch (error) {
-            next(error);
-        }
-    };
+                const note =
+                    await noteService
+                        .updateNote(
+                            req.params
+                                .id
+                                .toString(),
+                            req.body,
+                            userId
+                        );
+
+                res.status(200)
+                    .json(note);
+
+            } catch (error) {
+
+                next(error);
+            }
+        };
 
     async deleteNote(
         req: Request,
         res: Response,
         next: NextFunction
     ) {
-        try {
-            await noteService.deleteNote(req.params.id.toString());
 
-            res.status(200).json({
-                message: 'Note deleted successfully'
-            });
+        try {
+
+            const userId =
+                getAuthenticatedUserId(
+                    req
+                );
+
+            await noteService
+                .deleteNote(
+                    req.params
+                        .id
+                        .toString(),
+                    userId
+                );
+
+            res.status(200)
+                .json({
+                    message:
+                        'Note deleted successfully'
+                });
+
         } catch (error) {
+
             next(error);
         }
     }
 }
+
+
+
+
+

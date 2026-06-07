@@ -1,83 +1,108 @@
 # NoteTaker API
 
-A simple RESTful Note-Taking API built with **Node.js**, **Express**, **TypeScript**, **MongoDB**, and **Mongoose**.
+A secure RESTful Note-Taking API built with **Node.js**, **Express**, **TypeScript**, **MongoDB**, **Mongoose**, **JWT Authentication**, and **bcrypt**.
 
-The application allows users to create, retrieve, update, and delete notes while organizing them into categories. Categories are managed as separate entities and automatically created when they do not exist.
+The application allows users to register, authenticate, create notes, organize them into categories, and securely access only their own notes.
 
 ---
 
 ## Features
 
-- Create notes
-- Retrieve all notes
-- Retrieve a note by ID
-- Update existing notes
-- Delete notes
-- Retrieve notes by category
-- Automatic category creation and mapping
-- MongoDB persistence with Mongoose
-- DTO validation using `class-validator`
-- Generic validation middleware
-- Typed request logging middleware
-- Global error handling
-- Swagger/OpenAPI documentation
-- TypeScript support
+### Authentication
+
+- User Registration
+- User Login
+- Password Hashing using bcrypt
+- JWT Authentication
+- Protected Routes
+- Authentication Type Guard
+
+### Notes
+
+- Create Notes
+- Retrieve All Notes
+- Retrieve Note By ID
+- Update Note
+- Delete Note
+- Retrieve Notes By Category
+
+### Categories
+
+- Automatic Category Creation
+- Category Reuse
+- Category Mapping To Notes
+
+### Infrastructure
+
+- MongoDB Persistence with Mongoose
+- DTO Validation using `class-validator`
+- Generic Validation Middleware
+- Typed Request Logging Middleware
+- Global Error Handling
+- Swagger/OpenAPI Documentation
+- TypeScript Support
 
 ---
 
 ## Tech Stack
 
-- Node.js
-- Express
-- TypeScript
-- MongoDB
-- Mongoose
-- Swagger UI
-- Swagger JSDoc
-- Class Validator
-- Class Transformer
-- Dotenv
+| Technology | Purpose |
+|---|---|
+| Node.js | Runtime |
+| Express | Web Framework |
+| TypeScript | Type Safety |
+| MongoDB | Database |
+| Mongoose | ODM |
+| JWT | Authentication |
+| bcrypt | Password Hashing |
+| Swagger UI / JSDoc | API Documentation |
+| class-validator / class-transformer | DTO Validation |
+| dotenv | Environment Config |
 
 ---
 
 ## Project Structure
 
-```text
-src
+```
+src/
 │
-├── config
+├── config/
 │   ├── Database.ts
 │   └── Swagger.ts
 │
-├── controllers
+├── controllers/
 │   └── NoteController.ts
 │
-├── dto
+├── dto/
 │   ├── CreateNoteDto.ts
 │   └── UpdateNoteDto.ts
 │
-├── errors
+├── errors/
 │   └── AppError.ts
 │
-├── interfaces
+├── interfaces/
 │   ├── INote.ts
 │   └── ICategory.ts
 │
-├── middlewares
+├── middlewares/
 │   ├── ErrorMiddleware.ts
 │   ├── LoggingMiddleware.ts
 │   └── ValidationMiddleware.ts
 │
-├── models
+├── models/
 │   ├── Note.ts
 │   └── Category.ts
 │
-├── routes
+├── routes/
 │   └── NoteRoutes.ts
 │
-├── services
+├── services/
 │   ├── NoteService.ts
 │   └── CategoryService.ts
+│
+├── types/
+│   └── express/
+│       └── index.d.ts
 │
 ├── app.ts
 └── server.ts
@@ -85,7 +110,7 @@ src
 
 ---
 
-## Data Model
+## Data Models
 
 ### Category
 
@@ -113,47 +138,35 @@ src
 
 ## Installation
 
-### Clone Repository
-
 ```bash
 git clone https://github.com/sypha999/SimpleNoteTaker
 cd SimpleNoteTaker
-```
-
-### Install Dependencies
-
-```bash
 npm install
 ```
 
-### Configure Environment Variables
+### Environment Variables
 
-Create a `.env` file in the root directory.
+Create a `.env` file in the project root:
 
 ```env
 PORT=8787
 MONGODB_URI=mongodb://localhost:27017/notetaker
+JWT_SECRET=my-super-secret-key
+JWT_EXPIRES_IN=1d
 ```
 
 ---
 
 ## Running the Application
 
-### Development Mode
-
 ```bash
+# Development
 npm run dev
-```
 
-### Production Build
-
-```bash
+# Build
 npm run build
-```
 
-### Run Production Build
-
-```bash
+# Run Production Build
 npm start
 ```
 
@@ -161,33 +174,97 @@ npm start
 
 ## API Documentation
 
-### Postman Collection
+### Swagger UI
 
-Download the Postman collection:
+Available at:
 
-[NoteTaker Postman Collection](./NoteTaker-Postman-Collection-v2.1.json)
-
-### Swagger Documentation
-
-Swagger UI is available at:
-
-```text
+```
 http://localhost:8787/api-docs
 ```
 
+### Postman Collection
+
+[NoteTaker Postman Collection](./NoteTaker-Postman-Collection-v2.1.json)
+
 ---
 
-# API Endpoints
+## Authentication
 
-## Create Note
+All Note endpoints require a JWT token in the `Authorization` header:
 
-### Request
+```http
+Authorization: Bearer <jwt-token>
+```
+
+Obtain a token via `POST /api/auth/login`.
+
+---
+
+## API Endpoints
+
+### Auth
+
+| Method | Endpoint |
+|--------|-------------------|
+| POST | /api/auth/register |
+| POST | /api/auth/login |
+
+### Notes
+
+| Method | Endpoint |
+|--------|--------------------------------------|
+| GET | /api/v1/notes |
+| GET | /api/v1/notes/:id |
+| GET | /api/v1/notes/categories/:categoryId |
+| POST | /api/v1/notes |
+| PUT | /api/v1/notes/:id |
+| DELETE | /api/v1/notes/:id |
+
+---
+
+## Usage Examples
+
+### Register User
+
+```http
+POST /api/auth/register
+```
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "password": "Password123"
+}
+```
+
+### Login User
+
+```http
+POST /api/auth/login
+```
+
+```json
+{
+  "email": "john@example.com",
+  "password": "Password123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+### Create Note
 
 ```http
 POST /api/v1/notes
 ```
-
-### Body
 
 ```json
 {
@@ -197,7 +274,7 @@ POST /api/v1/notes
 }
 ```
 
-### Response
+**Response:**
 
 ```json
 {
@@ -211,17 +288,13 @@ POST /api/v1/notes
 }
 ```
 
----
-
-## Get All Notes
-
-### Request
+### Get All Notes
 
 ```http
 GET /api/v1/notes
 ```
 
-### Response
+**Response:**
 
 ```json
 [
@@ -237,17 +310,13 @@ GET /api/v1/notes
 ]
 ```
 
----
-
-## Get Note By ID
-
-### Request
+### Get Note By ID
 
 ```http
 GET /api/v1/notes/{id}
 ```
 
-### Response
+**Response:**
 
 ```json
 {
@@ -261,17 +330,13 @@ GET /api/v1/notes/{id}
 }
 ```
 
----
-
-## Get Notes By Category
-
-### Request
+### Get Notes By Category
 
 ```http
 GET /api/v1/notes/categories/{categoryId}
 ```
 
-### Response
+**Response:**
 
 ```json
 [
@@ -287,17 +352,11 @@ GET /api/v1/notes/categories/{categoryId}
 ]
 ```
 
----
-
-## Update Note
-
-### Request
+### Update Note
 
 ```http
 PUT /api/v1/notes/{id}
 ```
-
-### Body
 
 ```json
 {
@@ -307,7 +366,7 @@ PUT /api/v1/notes/{id}
 }
 ```
 
-### Response
+**Response:**
 
 ```json
 {
@@ -321,17 +380,13 @@ PUT /api/v1/notes/{id}
 }
 ```
 
----
-
-## Delete Note
-
-### Request
+### Delete Note
 
 ```http
 DELETE /api/v1/notes/{id}
 ```
 
-### Response
+**Response:**
 
 ```json
 {
@@ -342,17 +397,32 @@ DELETE /api/v1/notes/{id}
 
 ---
 
-# Validation
+## Note Ownership
 
-Request validation is implemented using:
+Each note belongs to a specific user. Users can only **create**, **view**, **update**, and **delete** their own notes — cross-user access is not permitted.
 
-- class-validator
-- class-transformer
+---
 
-Example DTO:
+## Category Management
+
+Categories are automatically managed by the application. When creating or updating a note:
+
+1. The system checks if the category exists.
+2. If it exists, the existing category is reused.
+3. If it does not exist, a new category is created.
+4. The note stores a reference to the category's ObjectId.
+
+This prevents duplicate category records and keeps the data normalized.
+
+---
+
+## Validation
+
+Validation uses `class-validator` and `class-transformer`.
 
 ```ts
 export class CreateNoteDto {
+
   @IsString()
   @IsNotEmpty()
   title!: string;
@@ -369,11 +439,9 @@ export class CreateNoteDto {
 
 ---
 
-# Error Handling
+## Error Handling
 
-Custom application errors are handled globally.
-
-Example response:
+Errors are handled globally and return consistent JSON responses.
 
 ```json
 {
@@ -381,22 +449,19 @@ Example response:
 }
 ```
 
-Common error codes:
-
-| Status Code | Description |
-|------------|-------------|
+| Status | Description |
+|--------|------------------------|
 | 400 | Bad Request |
-| 404 | Resource Not Found |
+| 401 | Unauthorized |
+| 404 | Not Found |
 | 409 | Conflict |
 | 500 | Internal Server Error |
 
 ---
 
-# Logging
+## Logging
 
-A typed logging middleware captures incoming requests.
-
-Example log:
+A typed middleware logs all incoming requests:
 
 ```json
 {
@@ -405,20 +470,3 @@ Example log:
   "timestamp": "2026-05-30T12:00:00.000Z"
 }
 ```
-
----
-
-# Category Management
-
-Categories are automatically managed by the application.
-
-When creating or updating a note:
-
-1. The system checks if the category exists.
-2. If it exists, the existing category is reused.
-3. If it does not exist, a new category is created.
-4. The note stores a reference to the category's ObjectId.
-
-This prevents duplicate category records and keeps the data normalized.
-
----
