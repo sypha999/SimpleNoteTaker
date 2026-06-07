@@ -19,7 +19,7 @@ const options: swaggerJsdoc.Options = {
         ],
         servers: [
             {
-                url: 'http://localhost:'+PORT,
+                url: process.env.API_URL || "http://localhost:" + PORT
             }
         ]
     },
