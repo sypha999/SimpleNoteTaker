@@ -2,85 +2,256 @@
   "info": {
     "name": "NoteTaker API",
     "_postman_id": "c9f4d3a2-8b7e-4c11-9f99-notetaker-api",
-    "description": "Postman Collection for the NoteTaker API",
+    "description": "Complete Postman Collection for the authenticated NoteTaker API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8787/api/v1"
+      "value": "http://localhost:8787",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
     },
     {
       "key": "noteId",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "categoryId",
-      "value": ""
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
     {
-      "name": "Create Note",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Sprint Planning\",\n  \"content\": \"Review backlog and discuss priorities\",\n  \"category\": \"Work\"\n}"
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
         },
-        "url": "{{baseUrl}}/notes"
-      }
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('token', json.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
     },
     {
-      "name": "Get All Notes",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/notes"
-      }
-    },
-    {
-      "name": "Get Note By ID",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/notes/{{noteId}}"
-      }
-    },
-    {
-      "name": "Get Notes By Category",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/notes/categories/{{categoryId}}"
-      }
-    },
-    {
-      "name": "Update Note",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Updated Sprint Planning\",\n  \"content\": \"Updated discussion notes\",\n  \"category\": \"Personal\"\n}"
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Create Note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const note = pm.response.json();",
+                  "pm.collectionVariables.set('noteId', note._id);",
+                  "if (note.category && note.category._id) {",
+                  "  pm.collectionVariables.set('categoryId', note.category._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sprint Planning\",\n  \"content\": \"Review backlog and discuss priorities\",\n  \"category\": \"Work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes"]
+            }
+          },
+          "response": []
         },
-        "url": "{{baseUrl}}/notes/{{noteId}}"
-      }
-    },
-    {
-      "name": "Delete Note",
-      "request": {
-        "method": "DELETE",
-        "url": "{{baseUrl}}/notes/{{noteId}}"
-      }
+        {
+          "name": "Get All Notes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Note By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notes By Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes", "categories", "{{categoryId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Sprint Planning\",\n  \"content\": \"Updated discussion notes\",\n  \"category\": \"Personal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notes/{{noteId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notes", "{{noteId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
